@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phantom Sight</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="logo-fixed">Phantom Sight</div>
+
+  <section id="screen-question" class="screen active">
+    <h1 class="statement">Not a modern AI. Something older.</h1>
+    <div class="sep"></div>
+    <div style="width: 100%; display: flex; flex-direction: column; gap: 1.5rem; margin: 1rem 0;">
+      <input id="n-field" class="q-field" type="text" placeholder="Name" autocomplete="off" spellcheck="false">
+      <input id="q-field" class="q-field" type="text" placeholder="Ask, and it shall be revealed." autocomplete="off" spellcheck="false">
+    </div>
+    <button id="q-submit" class="btn">Consult the Phantom</button>
+  </section>
+
+  <section id="screen-ritual" class="screen">
+    <div class="ritual-phrase-wrap">
+      <p class="eyebrow" style="margin-bottom:1.1rem;">The Oracle Speaks</p>
+      <p class="ritual-phrase" id="ritual-phrase"></p>
+    </div>
+    <div class="sep"></div>
+    <div class="response-block">
+      <p class="eyebrow">Speak Your Response</p>
+      <div class="display-area listening" id="display-area" aria-live="polite" aria-label="Response field">
+        <span id="t-revealed"></span><span id="t-cursor"></span><span id="t-pending"></span>
+      </div>
+      <p class="tab-hint" id="tab-hint">Press TAB to complete the ritual</p>
+    </div>
+    <button id="r-submit" class="btn">The Ritual Is Complete</button>
+  </section>
+
+  <section id="screen-complete" class="screen">
+    <span class="sigil" aria-hidden="true">&#10022;</span>
+    <div class="sep"></div>
+    <p class="eyebrow">The Oracle Has Revealed</p>
+    <p class="c-phrase" id="c-phrase"></p>
+    <p class="c-message">The ritual is sealed.</p>
+    <button id="c-again" class="btn" style="margin-top: 0.5rem;">Ask Again</button>
+  </section>
+
+  <section id="screen-failure" class="screen">
+    <p class="fail-text">The ritual remains incomplete.<br>You have not learned.</p>
+    <div class="sep"></div>
+    <p class="fail-sub">The oracle turns away.</p>
+    <button id="f-again" class="btn">Try Again</button>
+  </section>
+
+  <script src="js/phrases.js"></script>
+  <script src="js/mocks.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/handlers.js"></script>
+</body>
+</html>
