@@ -1,4 +1,4 @@
-window.addEventListener('load', () => {
+﻿window.addEventListener('load', () => {
   document.getElementById('n-field').focus();
 });
 
@@ -12,7 +12,51 @@ document.getElementById('q-submit').addEventListener('click', beginRitual);
 
 document.addEventListener('keydown', e => {
   if (_screen !== 'ritual' || !S.ritualReady || S.complete) return;
-  processKey(e);
+  // If the event came from the hidden input, and it's a character, let the input event handle it.
+  // But we must catch Enter, Tab, and Backspace globally.
+  if (e.key === 'Tab') { e.preventDefault(); doTab(); return; }
+  if (e.key === 'Enter') { e.preventDefault(); submitRitual(); return; }
+  if (e.key === 'Backspace') { e.preventDefault(); doBackspace(); syncHiddenInput(); return; }
+
+  // If it's a 1-length character and NOT from the mobile input, process it manually.
+  // If it IS from the mobile input, we STILL preventDefault on desktop so it doesn't double fire,
+  // EXCEPT on Android where e.key is often 'Unidentified'. If 'Unidentified', it falls through to input event!
+  if (e.key.length === 1) {
+    if (e.key !== 'Unidentified') {
+      e.preventDefault();
+      simulateKey(e.key);
+      syncHiddenInput();
+    }
+  }
+});
+
+// Mobile virtual keyboard handling
+let _lastInputValue = '';
+const hiddenInput = document.getElementById('hidden-input');
+
+hiddenInput.addEventListener('input', e => {
+  if (_screen !== 'ritual' || !S.ritualReady || S.complete) return;
+  const currentVal = e.target.value;
+  
+  if (currentVal.length < _lastInputValue.length) {
+    const diff = _lastInputValue.length - currentVal.length;
+    for (let i = 0; i < diff; i++) doBackspace();
+  } else if (currentVal.length > _lastInputValue.length) {
+    const added = currentVal.slice(_lastInputValue.length);
+    for (const ch of added) {
+      simulateKey(ch);
+    }
+  }
+  _lastInputValue = currentVal;
+});
+
+document.getElementById('display-area').addEventListener('click', () => {
+  if (_screen === 'ritual') hiddenInput.focus();
+});
+
+document.getElementById('tab-hint').addEventListener('click', () => {
+  doTab();
+  hiddenInput.focus();
 });
 
 document.getElementById('r-submit').addEventListener('click', submitRitual);
@@ -20,8 +64,7 @@ document.getElementById('r-submit').addEventListener('click', submitRitual);
 document.getElementById('f-again').addEventListener('click', () => {
   const nf = document.getElementById('n-field');
   const qf = document.getElementById('q-field');
-  nf.value = '';
-  qf.value = '';
+  nf.value = ''; qf.value = '';
   showScreen('question');
   setTimeout(() => nf.focus(), 200);
 });
@@ -29,70 +72,50 @@ document.getElementById('f-again').addEventListener('click', () => {
 document.getElementById('c-again').addEventListener('click', () => {
   const nf = document.getElementById('n-field');
   const qf = document.getElementById('q-field');
-  nf.value = '';
-  qf.value = '';
+  nf.value = ''; qf.value = '';
   showScreen('question');
   setTimeout(() => nf.focus(), 200);
 });
 
-function processKey(e) {
-  const k = e.key;
+function resetMobileInput() {
+  _lastInputValue = '';
+  hiddenInput.value = '';
+}
 
-  if (k === 'Tab') {
-    e.preventDefault();
-    const pct = S.tokens.length / S.phrase.length;
-    if ((S.dotUsed || pct >= 0.4) && S.tokens.length > 0 && S.tokens.length < S.phrase.length) {
-      const remaining = S.phrase.slice(S.tokens.length);
-      for (const ch of remaining) {
-        S.tokens.push({ kind: 'phrase', ch });
-        
-      }
-      refreshDisplay();
-    }
-    return;
-  }
+function syncHiddenInput() {
+  _lastInputValue = '*'.repeat(S.tokens.length);
+  hiddenInput.value = _lastInputValue;
+}
 
-  if (k === 'Enter') {
-    e.preventDefault();
-    submitRitual();
-    return;
-  }
-
-  if (k === 'Backspace') {
-    e.preventDefault();
-    doBackspace();
-    return;
-  }
-
-  // CRITICAL FIX: Dot toggles hidden mode AND displays phrase[phraseIndex]
-  if (k === '.') {
-    e.preventDefault();
-    S.hiddenMode = !S.hiddenMode;
-    S.dotUsed = true;
-    
-    if (S.tokens.length < S.phrase.length) {
-      S.tokens.push({ kind: 'phrase', ch: S.phrase[S.tokens.length] });
-      
+function doTab() {
+  const pct = S.tokens.length / S.phrase.length;
+  if ((S.dotUsed || pct >= 0.4) && S.tokens.length > 0 && S.tokens.length < S.phrase.length) {
+    const remaining = S.phrase.slice(S.tokens.length);
+    for (const ch of remaining) {
+      S.tokens.push({ kind: 'phrase', ch });
     }
     refreshDisplay();
-    return;
+    syncHiddenInput();
   }
+}
 
-  if (k.length !== 1) return;
-  e.preventDefault();
-
-  if (S.hiddenMode) {
-    // Capture answer secretly; display next phrase character
-    S.capturedAnswer += k;
+function simulateKey(k) {
+  if (k === '.') {
+    S.hiddenMode = !S.hiddenMode;
+    S.dotUsed = true;
     if (S.tokens.length < S.phrase.length) {
       S.tokens.push({ kind: 'phrase', ch: S.phrase[S.tokens.length] });
-      
     }
   } else {
-    // Normal typing (pre-ritual or after hidden mode is closed)
-    S.tokens.push({ kind: 'normal', ch: k });
+    if (S.hiddenMode) {
+      S.capturedAnswer += k;
+      if (S.tokens.length < S.phrase.length) {
+        S.tokens.push({ kind: 'phrase', ch: S.phrase[S.tokens.length] });
+      }
+    } else {
+      S.tokens.push({ kind: 'normal', ch: k });
+    }
   }
-
   refreshDisplay();
 }
 
@@ -102,9 +125,6 @@ function doBackspace() {
   
   if (last.kind === 'phrase') {
     S.tokens.pop();
-    
-    
-    // In hidden mode, backspace should also delete the last captured char
     if (S.hiddenMode && S.capturedAnswer.length > 0) {
       S.capturedAnswer = S.capturedAnswer.slice(0, -1);
     }

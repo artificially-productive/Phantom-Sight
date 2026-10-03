@@ -52,6 +52,7 @@ function beginRitual() {
   S.complete = false;
 
   showScreen('ritual');
+  if (typeof resetMobileInput === 'function') resetMobileInput();
   if (typeof refreshDisplay === 'function') refreshDisplay();
   animatePhraseIn(S.phrase);
 }
