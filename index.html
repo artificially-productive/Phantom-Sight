@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phantom Sight</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
+  <div id="ambient-orb"></div>
+  <div id="floating-objects"></div>
   <div class="logo-fixed">Phantom Sight</div>
 
   <section id="screen-question" class="screen active">
@@ -16,7 +19,7 @@
       <input id="n-field" class="q-field" type="text" placeholder="Name" autocomplete="off" spellcheck="false">
       <input id="q-field" class="q-field" type="text" placeholder="Ask, and it shall be revealed." autocomplete="off" spellcheck="false">
     </div>
-    <button id="q-submit" class="btn">Consult the Phantom</button>
+    <button id="q-submit" class="btn">Establish Connection</button>
   </section>
 
   <section id="screen-ritual" class="screen">
@@ -34,6 +37,15 @@
       <p class="tab-hint" id="tab-hint">Press Tab or Tap Here to complete the ritual</p>
     </div>
     <button id="r-submit" class="btn">The Ritual Is Complete</button>
+  </section>
+
+  <section id="screen-loader" class="screen">
+    <div class="loader-container" style="display: flex; gap: 1rem; align-items: center; justify-content: center;">
+      <div class="loader-dot" style="width: 12px; height: 12px; background: var(--accent); border-radius: 50%;"></div>
+      <div class="loader-dot" style="width: 12px; height: 12px; background: var(--accent); border-radius: 50%;"></div>
+      <div class="loader-dot" style="width: 12px; height: 12px; background: var(--accent); border-radius: 50%;"></div>
+    </div>
+    <p class="loader-text" style="margin-top: 2rem; font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-dim);">Connecting to the ether...</p>
   </section>
 
   <section id="screen-complete" class="screen">
@@ -54,6 +66,7 @@
 
   <script src="js/phrases.js"></script>
   <script src="js/mocks.js"></script>
+  <script src="js/animations.js"></script>
   <script src="js/app.js"></script>
   <script src="js/handlers.js"></script>
 </body>

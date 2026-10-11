@@ -18,6 +18,15 @@ function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
   _screen = name;
+
+  // Trigger GSAP animations for the new screen
+  if (name === 'ritual' && window.animateScreenRitual) {
+      window.animateScreenRitual();
+  } else if (name === 'loader' && window.animateScreenLoader) {
+      window.animateScreenLoader();
+  } else if (name === 'complete' && window.animateScreenComplete) {
+      window.animateScreenComplete();
+  }
 }
 
 function beginRitual() {
@@ -28,13 +37,13 @@ function beginRitual() {
   
   if (!nVal || !qVal) {
     if (!nVal) {
-      nField.style.borderColor = 'rgba(107,46,46,0.6)';
-      nField.style.color = 'rgba(107,46,46,0.8)';
+      nField.style.borderColor = 'rgba(225, 29, 72, 0.6)';
+      nField.style.color = 'rgba(225, 29, 72, 0.8)';
       setTimeout(() => { nField.style.borderColor = ''; nField.style.color = ''; }, 900);
     }
     if (!qVal) {
-      qField.style.borderColor = 'rgba(107,46,46,0.6)';
-      qField.style.color = 'rgba(107,46,46,0.8)';
+      qField.style.borderColor = 'rgba(225, 29, 72, 0.6)';
+      qField.style.color = 'rgba(225, 29, 72, 0.8)';
       setTimeout(() => { qField.style.borderColor = ''; qField.style.color = ''; }, 900);
     }
     return;
@@ -51,10 +60,23 @@ function beginRitual() {
   S.ritualReady = false;
   S.complete = false;
 
-  showScreen('ritual');
-  if (typeof resetMobileInput === 'function') resetMobileInput();
-  if (typeof refreshDisplay === 'function') refreshDisplay();
-  animatePhraseIn(S.phrase);
+  // Animate the current screen out before switching
+  gsap.to("#screen-question > *", {
+    y: -30,
+    opacity: 0,
+    duration: 0.8,
+    stagger: 0.1,
+    ease: "power2.in",
+    onComplete: () => {
+      showScreen('ritual');
+      if (typeof resetMobileInput === 'function') resetMobileInput();
+      if (typeof refreshDisplay === 'function') refreshDisplay();
+      animatePhraseIn(S.phrase);
+      
+      // Reset properties for next time
+      gsap.set("#screen-question > *", { clearProps: "all" });
+    }
+  });
 }
 
 function animatePhraseIn(phrase) {
@@ -111,10 +133,39 @@ function checkComplete() {
     S.complete = true;
     S.ritualReady = false;
     saveRecord();
-    setTimeout(() => {
-      document.getElementById('c-phrase').textContent = S.capturedAnswer || "The spirits are silent.";
-      showScreen('complete');
-    }, 500); // reduced delay slightly for responsiveness after enter
+
+    // Animate ritual screen out
+    gsap.to("#screen-ritual > *", {
+        y: -30,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: "power2.in",
+        onComplete: () => {
+            showScreen('loader');
+            
+            // Wait for 2.5 seconds (pretend to connect to the ether)
+            setTimeout(() => {
+                // Animate loader out
+                gsap.to("#screen-loader > *", {
+                    opacity: 0,
+                    scale: 0.8,
+                    duration: 0.5,
+                    onComplete: () => {
+                        // Kill the infinite bouncing animation so it resets properly next time
+                        gsap.killTweensOf("#screen-loader .loader-dot");
+                        
+                        document.getElementById('c-phrase').textContent = S.capturedAnswer || "The spirits are silent.";
+                        showScreen('complete');
+                        
+                        // Clean up GSAP props for screens we just exited
+                        gsap.set("#screen-ritual > *", { clearProps: "all" });
+                        gsap.set("#screen-loader > *", { clearProps: "all" });
+                    }
+                });
+            }, 2500);
+        }
+    });
   }
 }
 
