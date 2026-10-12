@@ -1,14 +1,14 @@
 ﻿const PHRASES = [
-  "All hail to the mighty porcupine",
-  "The veil between worlds grows thin tonight",
-  "Speak and the darkness shall hear you",
-  "What is hidden shall be revealed in time",
-  "The ancient ones have been summoned forth",
-  "By blood and shadow truth shall be known",
-  "The mirror shows what cannot be unseen",
-  "Between the stars the whisper ever dwells",
-  "What the eye cannot see the hand remembers",
-  "The void remembers all that you have spoken",
-  "Even silence carries the weight of names",
-  "That which is asked shall not be forgotten"
+  "All hail the porcupine in a tiny crown",
+  "The moon has put on its favourite slippers",
+  "Whisper your wish to the giggling stars",
+  "A little surprise is hiding in your hat",
+  "The woodland wizards have come for biscuits",
+  "By jam and jelly let the magic begin",
+  "The mirror says you look rather wonderful",
+  "Somewhere a dragon is blowing bubblegum",
+  "The answer is tucked beneath a fluffy tail",
+  "The sleepy owl remembers every little wish",
+  "Even the teapot has a tale to tell",
+  "Every good question deserves a little magic"
 ];
